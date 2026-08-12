@@ -26,12 +26,9 @@ export function RichText({ richText }) {
 }
 
 function Callout({ block }) {
-  const icon =
-    block.callout.icon?.type === "emoji" ? block.callout.icon.emoji : "💡";
   const color = block.callout.color || "gray_background";
   return (
     <div className={"callout bg-" + color.replace("_background", "")}>
-      <div className="callout-icon">{icon}</div>
       <div className="callout-body">
         <RichText richText={block.callout.rich_text} />
         {block._children && <Blocks blocks={block._children} />}
