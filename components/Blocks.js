@@ -1,4 +1,4 @@
-function RichText({ richText }) {
+export function RichText({ richText }) {
   if (!richText || richText.length === 0) return null;
   return richText.map((rt, i) => {
     let el = rt.plain_text;
