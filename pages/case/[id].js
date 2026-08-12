@@ -3,12 +3,18 @@ import Blocks from "../../components/Blocks";
 import Head from "next/head";
 import Link from "next/link";
 
-export default function CasePage({ title, icon, blocks, notFound }) {
-  if (notFound) {
+export default function CasePage({ title, icon, blocks, error }) {
+  if (error) {
     return (
       <main className="page">
-        <p>Case not found. It may have been moved or deleted in Notion.</p>
-        <Link href="/">← Back to all cases</Link>
+        <Link href="/" className="back-link">← Back to all cases</Link>
+        <h1>Something went wrong loading this case</h1>
+        <div className="callout bg-red">
+          <div className="callout-icon">⚠️</div>
+          <div className="callout-body">
+            <p><strong>Error:</strong> {error}</p>
+          </div>
+        </div>
       </main>
     );
   }
@@ -29,6 +35,9 @@ export default function CasePage({ title, icon, blocks, notFound }) {
 }
 
 export async function getServerSideProps({ params }) {
+  if (!process.env.NOTION_TOKEN) {
+    return { props: { error: "Missing NOTION_TOKEN environment variable." } };
+  }
   // Re-insert dashes into the raw 32-char ID so the Notion SDK accepts it
   const raw = params.id.replace(/-/g, "");
   const pageId = [
@@ -46,6 +55,6 @@ export async function getServerSideProps({ params }) {
     ]);
     return { props: { title: meta.title, icon: meta.icon, blocks } };
   } catch (err) {
-    return { props: { notFound: true, title: "Not found", icon: null, blocks: [] } };
+    return { props: { error: err.message || "Unknown error" } };
   }
 }
