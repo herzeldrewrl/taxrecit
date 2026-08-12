@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 function RichText({ richText }) {
   if (!richText || richText.length === 0) return null;
   return richText.map((rt, i) => {
@@ -58,8 +56,10 @@ function Toggle({ block }) {
 function TableBlock({ block }) {
   const rows = block._children || [];
   const hasHeader = block.table.has_column_header;
+  const width = block.table.table_width;
+  const cls = "notion-table" + (width === 3 ? " cols-3" : width === 4 ? " cols-4" : "");
   return (
-    <table className="notion-table">
+    <table className={cls}>
       <tbody>
         {rows.map((row, ri) => {
           const Tag = hasHeader && ri === 0 ? "th" : "td";
@@ -98,21 +98,12 @@ function ListGroup({ items, ordered }) {
   );
 }
 
-function ChildPageLink({ block }) {
-  return (
-    <Link href={`/case/${block.id.replace(/-/g, "")}`} className="case-link">
-      📄 {block.child_page.title}
-    </Link>
-  );
-}
-
 export default function Blocks({ blocks }) {
   const out = [];
   let i = 0;
   while (i < blocks.length) {
     const block = blocks[i];
 
-    // Group consecutive bulleted/numbered list items into a single <ul>/<ol>
     if (block.type === "bulleted_list_item" || block.type === "numbered_list_item") {
       const ordered = block.type === "numbered_list_item";
       const group = [];
@@ -125,13 +116,16 @@ export default function Blocks({ blocks }) {
     }
 
     switch (block.type) {
-      case "paragraph":
+      case "paragraph": {
+        const text = block.paragraph.rich_text.map((t) => t.plain_text).join("");
+        const isDisposition = text.trim().startsWith("Disposition:");
         out.push(
-          <p key={block.id}>
+          <p key={block.id} className={isDisposition ? "disposition" : undefined}>
             <RichText richText={block.paragraph.rich_text} />
           </p>
         );
         break;
+      }
       case "heading_1":
         out.push(
           <h1 key={block.id}>
@@ -172,9 +166,6 @@ export default function Blocks({ blocks }) {
           </blockquote>
         );
         break;
-      case "child_page":
-        out.push(<ChildPageLink key={block.id} block={block} />);
-        break;
       case "to_do":
         out.push(
           <div key={block.id} className="todo">
@@ -184,7 +175,6 @@ export default function Blocks({ blocks }) {
         );
         break;
       default:
-        // Unsupported block types are skipped silently
         break;
     }
     i++;
