@@ -1,12 +1,11 @@
 import { getBlockChildren, getPageMeta } from "../lib/notion";
-import Blocks from "../components/Blocks";
+import Blocks, { RichText } from "../components/Blocks";
 import Head from "next/head";
 
 function plainText(richText) {
   return (richText || []).map((t) => t.plain_text).join("");
 }
 
-// Split "Session 1 — August 13, 2026" into { label: "Session 1", date: "August 13, 2026" }
 function splitSessionTitle(text) {
   const parts = text.split(/—|-{1,2}/);
   return {
@@ -28,12 +27,13 @@ async function buildSessions(rootPageId) {
         id: "session-" + (sessions.length + 1),
         title: titleText,
         cases: [],
+        pendingItems: [],
         extraBlocks: [],
       };
       sessions.push(current);
     } else if (block.type === "child_page") {
       if (!current) {
-        current = { id: "session-1", title: "Cases", cases: [], extraBlocks: [] };
+        current = { id: "session-1", title: "Cases", cases: [], pendingItems: [], extraBlocks: [] };
         sessions.push(current);
       }
       const [meta, blocks] = await Promise.all([
@@ -46,6 +46,8 @@ async function buildSessions(rootPageId) {
         icon: meta.icon,
         blocks,
       });
+    } else if (block.type === "numbered_list_item") {
+      if (current) current.pendingItems.push(block);
     } else if (current) {
       current.extraBlocks.push(block);
     }
@@ -107,6 +109,11 @@ export default function Home({ title, sessions, error }) {
                   {s.cases.map((c) => (
                     <li key={c.id}>
                       <a href={`#${c.id}`}>{c.title}</a>
+                    </li>
+                  ))}
+                  {s.pendingItems.map((block) => (
+                    <li key={block.id}>
+                      <RichText richText={block.numbered_list_item.rich_text} />
                     </li>
                   ))}
                 </ol>
