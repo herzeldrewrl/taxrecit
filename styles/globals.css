@@ -172,18 +172,14 @@ hr {
 .notion-table tr:nth-child(even) td {
   background: #f9f9f9;
 }
-.notion-table.cols-3 td:first-child {
+/* Numbered argument-breakdown tables: narrow, bold, centered first column */
+.notion-table.arg-table td:first-child {
   text-align: center;
   font-weight: bold;
   width: 3%;
 }
-.notion-table.cols-4 td:first-child,
-.notion-table.cols-4 th:first-child {
-  text-align: left;
-  font-weight: normal;
-  width: 26%;
-}
-.notion-table.cols-4 {
+/* Data/schedule tables (e.g. tax rate schedules): first column is a real label, left-aligned */
+.notion-table.schedule-table {
   font-size: 0.85em;
 }
 
