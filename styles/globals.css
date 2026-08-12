@@ -277,5 +277,6 @@ hr {
   .sidebar { display: none; }
   .page-wrap { display: block; }
   .toc { display: none; }
+  .toggle { display: none; }
   body { margin: 0; padding: 0 8px; }
 }
