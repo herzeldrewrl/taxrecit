@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 import { getBlockChildren, getPageMeta } from "../lib/notion";
 import Blocks, { RichText } from "../components/Blocks";
 import Head from "next/head";
@@ -6,6 +8,7 @@ function plainText(richText) {
   return (richText || []).map((t) => t.plain_text).join("");
 }
 
+// Split "Session 1 — August 13, 2026" into { label: "Session 1", date: "August 13, 2026" }
 function splitSessionTitle(text) {
   const parts = text.split(/—|-{1,2}/);
   return {
@@ -57,6 +60,15 @@ async function buildSessions(rootPageId) {
 }
 
 export default function Home({ title, sessions, error }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.replace(router.asPath, undefined, { scroll: false });
+    }, 30000); // auto-refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [router]);
+
   if (error) {
     return (
       <main style={{ padding: 24 }}>
