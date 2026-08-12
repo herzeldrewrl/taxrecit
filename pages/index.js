@@ -74,7 +74,6 @@ export default function Home({ title, sessions, error }) {
       <main style={{ padding: 24 }}>
         <h1>Something went wrong loading Notion</h1>
         <div className="callout bg-red">
-          <div className="callout-icon">⚠️</div>
           <div className="callout-body">
             <p><strong>Error:</strong> {error}</p>
           </div>
