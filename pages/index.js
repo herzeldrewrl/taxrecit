@@ -118,8 +118,13 @@ export default function Home({ title, sessions, error }) {
           {sessions.map((s) => (
             <div key={s.id} id={s.id}>
               <h1 className="session-banner">{s.title.toUpperCase()}</h1>
-              {s.cases.map((c) => (
-                <div key={c.id} id={c.id} className="case-section">
+              {s.cases.map((c, idx) => (
+                <div
+                  key={c.id}
+                  id={c.id}
+                  className="case-section"
+                  style={idx > 0 ? { pageBreakBefore: "always" } : undefined}
+                >
                   <h1>{c.title}</h1>
                   <Blocks blocks={c.blocks} />
                 </div>
