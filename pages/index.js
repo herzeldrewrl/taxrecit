@@ -2,10 +2,62 @@ import { getBlockChildren, getPageMeta } from "../lib/notion";
 import Blocks from "../components/Blocks";
 import Head from "next/head";
 
-export default function Home({ title, icon, blocks, error }) {
+function plainText(richText) {
+  return (richText || []).map((t) => t.plain_text).join("");
+}
+
+// Split "Session 1 — August 13, 2026" into { label: "Session 1", date: "August 13, 2026" }
+function splitSessionTitle(text) {
+  const parts = text.split(/—|-{1,2}/);
+  return {
+    label: (parts[0] || text).trim(),
+    date: parts.length > 1 ? parts.slice(1).join("-").trim() : "",
+  };
+}
+
+async function buildSessions(rootPageId) {
+  const rootBlocks = await getBlockChildren(rootPageId);
+
+  const sessions = [];
+  let current = null;
+
+  for (const block of rootBlocks) {
+    if (block.type === "heading_2") {
+      const titleText = plainText(block.heading_2.rich_text);
+      current = {
+        id: "session-" + (sessions.length + 1),
+        title: titleText,
+        cases: [],
+        extraBlocks: [],
+      };
+      sessions.push(current);
+    } else if (block.type === "child_page") {
+      if (!current) {
+        current = { id: "session-1", title: "Cases", cases: [], extraBlocks: [] };
+        sessions.push(current);
+      }
+      const [meta, blocks] = await Promise.all([
+        getPageMeta(block.id),
+        getBlockChildren(block.id),
+      ]);
+      current.cases.push({
+        id: "case-" + block.id.replace(/-/g, ""),
+        title: meta.title,
+        icon: meta.icon,
+        blocks,
+      });
+    } else if (current) {
+      current.extraBlocks.push(block);
+    }
+  }
+
+  return sessions;
+}
+
+export default function Home({ title, sessions, error }) {
   if (error) {
     return (
-      <main className="page">
+      <main style={{ padding: 24 }}>
         <h1>Something went wrong loading Notion</h1>
         <div className="callout bg-red">
           <div className="callout-icon">⚠️</div>
@@ -21,15 +73,61 @@ export default function Home({ title, icon, blocks, error }) {
       </main>
     );
   }
+
   return (
     <>
       <Head>
         <title>{title}</title>
       </Head>
-      <main className="page">
-        {icon && <div className="page-icon">{icon}</div>}
-        <Blocks blocks={blocks} />
-      </main>
+      <h1 className="top-title">{title}</h1>
+
+      <div className="page-wrap">
+        <div className="sidebar">
+          <h4>Sessions</h4>
+          {sessions.map((s) => {
+            const { label, date } = splitSessionTitle(s.title);
+            return (
+              <a key={s.id} href={`#${s.id}`}>
+                {label}
+                {date && <span className="date">{date}</span>}
+              </a>
+            );
+          })}
+        </div>
+
+        <div className="main-content">
+          <div className="toc">
+            <strong>Table of Contents</strong>
+            {sessions.map((s) => (
+              <div key={s.id}>
+                <p style={{ margin: "6px 0 2px 0" }}>
+                  <strong>{s.title}</strong>
+                </p>
+                <ol>
+                  {s.cases.map((c) => (
+                    <li key={c.id}>
+                      <a href={`#${c.id}`}>{c.title}</a>
+                    </li>
+                  ))}
+                </ol>
+                {s.extraBlocks.length > 0 && <Blocks blocks={s.extraBlocks} />}
+              </div>
+            ))}
+          </div>
+
+          {sessions.map((s) => (
+            <div key={s.id} id={s.id}>
+              <h1 className="session-banner">{s.title.toUpperCase()}</h1>
+              {s.cases.map((c) => (
+                <div key={c.id} id={c.id} className="case-section">
+                  <h1>{c.title}</h1>
+                  <Blocks blocks={c.blocks} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </>
   );
 }
@@ -44,14 +142,10 @@ export async function getServerSideProps() {
     };
   }
   try {
-    const [meta, blocks] = await Promise.all([
-      getPageMeta(rootPageId),
-      getBlockChildren(rootPageId),
-    ]);
-    return { props: { title: meta.title, icon: meta.icon, blocks } };
+    const meta = await getPageMeta(rootPageId);
+    const sessions = await buildSessions(rootPageId);
+    return { props: { title: meta.title, sessions } };
   } catch (err) {
-    return {
-      props: { error: err.message || "Unknown error" },
-    };
+    return { props: { error: err.message || "Unknown error" } };
   }
 }
