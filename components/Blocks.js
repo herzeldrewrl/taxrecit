@@ -1,9 +1,20 @@
+import Link from "next/link";
+
+function renderTextWithBreaks(text) {
+  const parts = text.split("\n");
+  const out = [];
+  parts.forEach((part, i) => {
+    out.push(part);
+    if (i < parts.length - 1) out.push(<br key={"br" + i} />);
+  });
+  return out;
+}
+
 export function RichText({ richText }) {
   if (!richText || richText.length === 0) return null;
   return richText.map((rt, i) => {
-    let el = rt.plain_text;
     const a = rt.annotations || {};
-    let node = el;
+    let node = renderTextWithBreaks(rt.plain_text);
     if (rt.href) {
       node = (
         <a href={rt.href} target="_blank" rel="noreferrer">
@@ -95,6 +106,14 @@ function ListGroup({ items, ordered }) {
   );
 }
 
+function ChildPageLink({ block }) {
+  return (
+    <Link href={`/case/${block.id.replace(/-/g, "")}`} className="case-link">
+      {block.child_page.title}
+    </Link>
+  );
+}
+
 export default function Blocks({ blocks }) {
   const out = [];
   let i = 0;
@@ -162,6 +181,9 @@ export default function Blocks({ blocks }) {
             <RichText richText={block.quote.rich_text} />
           </blockquote>
         );
+        break;
+      case "child_page":
+        out.push(<ChildPageLink key={block.id} block={block} />);
         break;
       case "to_do":
         out.push(
