@@ -8,7 +8,6 @@ function plainText(richText) {
   return (richText || []).map((t) => t.plain_text).join("");
 }
 
-// Split "Session 1 — August 13, 2026" into { label: "Session 1", date: "August 13, 2026" }
 function splitSessionTitle(text) {
   const parts = text.split(/—|-{1,2}/);
   return {
@@ -65,7 +64,7 @@ export default function Home({ title, sessions, error }) {
   useEffect(() => {
     const interval = setInterval(() => {
       router.replace(router.asPath, undefined, { scroll: false });
-    }, 30000); // auto-refresh every 30 seconds
+    }, 30000);
     return () => clearInterval(interval);
   }, [router]);
 
