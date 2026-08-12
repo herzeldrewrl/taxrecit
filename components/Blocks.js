@@ -64,8 +64,12 @@ function Toggle({ block }) {
 function TableBlock({ block }) {
   const rows = block._children || [];
   const hasHeader = block.table.has_column_header;
-  const width = block.table.table_width;
-  const cls = "notion-table" + (width === 3 ? " cols-3" : width === 4 ? " cols-4" : "");
+  const firstHeaderText =
+    hasHeader && rows[0]
+      ? rows[0].table_row.cells[0].map((t) => t.plain_text).join("").trim()
+      : "";
+  const isArgTable = firstHeaderText === "#";
+  const cls = "notion-table" + (isArgTable ? " arg-table" : " schedule-table");
   return (
     <table className={cls}>
       <tbody>
