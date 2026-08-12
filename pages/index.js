@@ -44,3 +44,14 @@ export async function getServerSideProps() {
     };
   }
   try {
+    const [meta, blocks] = await Promise.all([
+      getPageMeta(rootPageId),
+      getBlockChildren(rootPageId),
+    ]);
+    return { props: { title: meta.title, icon: meta.icon, blocks } };
+  } catch (err) {
+    return {
+      props: { error: err.message || "Unknown error" },
+    };
+  }
+}
