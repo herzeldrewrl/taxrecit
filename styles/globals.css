@@ -328,9 +328,5 @@ hr {
     line-height: 1.25;
   }
   .notion-table { margin-top: 2px; font-size: 0.95em; }
-  .notion-table tr {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
   .session-banner { padding: 4px 10px; margin: 8px 0; font-size: 1.15em; }
 }
