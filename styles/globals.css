@@ -228,6 +228,7 @@ hr {
   font-size: 0.9em;
   font-weight: 600;
   list-style: none;
+  text-decoration: none;
 }
 .sidebar-session-link::-webkit-details-marker {
   display: none;
@@ -240,6 +241,7 @@ hr {
   font-size: 0.75em;
   font-weight: normal;
   color: #ccc;
+  text-decoration: none;
 }
 .sidebar-case-list {
   display: flex;
