@@ -99,12 +99,22 @@ export default function Home({ title, sessions, error }) {
           {sessions.map((s) => {
             const { label, date } = splitSessionTitle(s.title);
             return (
-              <a key={s.id} href={`#${s.id}`}>
-                {label}
-                {date && <span className="date">{date}</span>}
-              </a>
+              <div key={s.id} className="sidebar-session">
+                <a href={`#${s.id}`} className="sidebar-session-link">
+                  {label}
+                  {date && <span className="date">{date}</span>}
+                </a>
+                <div className="sidebar-case-list">
+                  {s.cases.map((c) => (
+                    <a key={c.id} href={`#${c.id}`} className="sidebar-case-link">
+                      {c.title}
+                    </a>
+                  ))}
+                </div>
+              </div>
             );
           })}
+        </div>
         </div>
 
         <div className="main-content">
