@@ -221,12 +221,16 @@ hr {
   display: block;
   color: #fff;
   background-color: #444;
-  text-decoration: none;
+  cursor: pointer;
   padding: 6px 8px;
   border-radius: 4px;
   margin-bottom: 4px;
   font-size: 0.9em;
   font-weight: 600;
+  list-style: none;
+}
+.sidebar-session-link::-webkit-details-marker {
+  display: none;
 }
 .sidebar-session-link:hover {
   background-color: #e75480;
