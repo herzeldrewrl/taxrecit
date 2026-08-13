@@ -318,16 +318,16 @@ hr {
     font-size: 0.78em;
     line-height: 1.15;
   }
-  h1 { margin: 3px 0 6px 0; padding-bottom: 2px; }
-  h2 { margin: 6px 0 3px 0; }
-  h3 { margin: 6px 0 2px 0; }
-  p { margin: 3px 0; }
-  .callout { padding: 4px 8px; margin: 3px 0 6px 0; }
+  h1 { margin: 2px 0 4px 0; padding-bottom: 1px; }
+  h2 { margin: 4px 0 2px 0; }
+  h3 { margin: 4px 0 1px 0; page-break-after: avoid; }
+  p { margin: 2px 0; }
+  .callout { padding: 3px 7px; margin: 2px 0 4px 0; }
   .notion-table td, .notion-table th {
-    padding: 3px 6px;
-    line-height: 1.3;
+    padding: 2px 5px;
+    line-height: 1.25;
   }
-  .notion-table { margin-top: 3px; font-size: 0.95em; }
+  .notion-table { margin-top: 2px; font-size: 0.95em; }
   .notion-table tr {
     page-break-inside: avoid;
     break-inside: avoid;
