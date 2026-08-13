@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getBlockChildren, getPageMeta } from "../lib/notion";
 import Blocks, { RichText } from "../components/Blocks";
@@ -61,6 +61,7 @@ async function buildSessions(rootPageId) {
 
 export default function Home({ title, sessions, error }) {
   const router = useRouter();
+  const [openSessions, setOpenSessions] = useState(() => new Set(sessions.map((s) => s.id)));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -100,11 +101,24 @@ export default function Home({ title, sessions, error }) {
           {sessions.map((s) => {
             const { label, date } = splitSessionTitle(s.title);
             return (
-              <div key={s.id} className="sidebar-session">
-                <a href={`#${s.id}`} className="sidebar-session-link">
+              <details
+                key={s.id}
+                className="sidebar-session"
+                open={openSessions.has(s.id)}
+                onToggle={(e) => {
+                  const isOpen = e.target.open;
+                  setOpenSessions((prev) => {
+                    const next = new Set(prev);
+                    if (isOpen) next.add(s.id);
+                    else next.delete(s.id);
+                    return next;
+                  });
+                }}
+              >
+                <summary className="sidebar-session-link">
                   {label}
                   {date && <span className="date">{date}</span>}
-                </a>
+                </summary>
                 <div className="sidebar-case-list">
                   {s.cases.map((c) => (
                     <a key={c.id} href={`#${c.id}`} className="sidebar-case-link">
@@ -112,7 +126,7 @@ export default function Home({ title, sessions, error }) {
                     </a>
                   ))}
                 </div>
-              </div>
+              </details>
             );
           })}
         </div>
