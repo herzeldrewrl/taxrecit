@@ -61,7 +61,10 @@ async function buildSessions(rootPageId) {
 
 export default function Home({ title, sessions, error }) {
   const router = useRouter();
-  const [openSessions, setOpenSessions] = useState(() => new Set(sessions.map((s) => s.id)));
+  const safeSessions = sessions || [];
+  const [openSessions, setOpenSessions] = useState(
+    () => new Set(safeSessions.map((s) => s.id))
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -178,20 +181,29 @@ export default function Home({ title, sessions, error }) {
   );
 }
 
-export async function getServerSideProps() {
+// ISR: build this page at most once every 60 seconds, no matter how many people
+// are viewing it. Visitors get the cached HTML instantly; Vercel re-fetches from
+// Notion in the background only when the cache is older than `revalidate` seconds.
+// This decouples "how many people are on the site" from "how many Notion API calls
+// we make" -- fixing rate-limit errors that show up under concurrent viewers.
+export async function getStaticProps() {
   const rootPageId = process.env.NOTION_ROOT_PAGE_ID;
   if (!rootPageId || !process.env.NOTION_TOKEN) {
     return {
       props: {
         error: "Missing NOTION_TOKEN or NOTION_ROOT_PAGE_ID environment variable.",
       },
+      revalidate: 10, // retry soon in case env vars were just fixed
     };
   }
   try {
     const meta = await getPageMeta(rootPageId);
     const sessions = await buildSessions(rootPageId);
-    return { props: { title: meta.title, sessions } };
+    return { props: { title: meta.title, sessions }, revalidate: 60 };
   } catch (err) {
-    return { props: { error: err.message || "Unknown error" } };
+    return {
+      props: { error: err.message || "Unknown error" },
+      revalidate: 10, // retry soon rather than caching an error for a full minute
+    };
   }
 }
